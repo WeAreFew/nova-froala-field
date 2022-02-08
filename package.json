@@ -28,6 +28,6 @@
         "tui-code-snippet": "1.4.0",
         "tui-image-editor": "3.2.2",
         "vue": "^2.6.0",
-        "vue-froala-wysiwyg": "^3.2.5-1"
+        "vue-froala-wysiwyg": "^3.2.7"
     }
 }

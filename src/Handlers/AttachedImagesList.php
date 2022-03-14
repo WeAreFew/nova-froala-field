@@ -3,6 +3,7 @@
 namespace Froala\NovaFroalaField\Handlers;
 
 use Froala\NovaFroalaField\Froala;
+use Froala\NovaFroalaField\Models\Attachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,15 +37,15 @@ class AttachedImagesList
 
         $disk = Storage::disk($this->field->disk);
 
-        foreach ($disk->allFiles() as $file) {
-            if (! app()->runningUnitTests() && Str::before((string) $disk->getMimetype($file), '/') !== 'image') {
-                continue;
-            }
+        foreach (Attachment::all() as $file) {
+            $fileType = pathinfo($file->attachment, PATHINFO_EXTENSION);
 
-            $url = $disk->url($file);
+            $thumbUrl = substr_replace($file->url, "_thumb", strpos($file->url, '.' . $fileType)) . '.' . $fileType;
+            $thumbFilename = substr_replace($file->attachment, "_thumb", strpos($file->attachment, '.' . $fileType)) . '.' . $fileType;
+
             $images[] = [
-                'url' => $url,
-                'thumb' => $url,
+                'url' => $file->url,
+                'thumb' => $disk->exists($thumbFilename) ? $thumbUrl : $file->url,
             ];
         }
 

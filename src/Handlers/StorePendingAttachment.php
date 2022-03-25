@@ -49,9 +49,10 @@ class StorePendingAttachment
                     $request->attachment->getClientOriginalName(),
                     $this->field->disk
                 ) : $request->attachment->store($this->field->getStorageDir(), $this->field->disk),
+            'origin_filename' => $request->attachment->getClientOriginalName(),
             'disk' => $this->field->disk,
         ]);
-
+        
         $attachment = $attachmentModel->attachment;
 
         $this->imageOptimize($attachment);

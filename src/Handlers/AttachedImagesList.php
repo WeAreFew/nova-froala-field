@@ -37,7 +37,13 @@ class AttachedImagesList
 
         $disk = Storage::disk($this->field->disk);
 
-        foreach (Attachment::all() as $file) {
+        if ($request->has('search') && $request->input('search') != '') {
+            $attachmentFiles = Attachment::where('origin_filename', 'like', "%{$request->input('search')}%")->get();
+        } else {
+            $attachmentFiles = Attachment::all();
+        }
+
+        foreach ($attachmentFiles as $file) {
             $fileType = pathinfo($file->attachment, PATHINFO_EXTENSION);
 
             $thumbUrl = substr_replace($file->url, "_thumb", strpos($file->url, '.' . $fileType)) . '.' . $fileType;

@@ -52,6 +52,7 @@ class AttachedImagesList
             $images[] = [
                 'url' => $file->url,
                 'thumb' => $disk->exists($thumbFilename) ? $thumbUrl : $file->url,
+                'filename' => $file->origin_filename,
             ];
         }
 

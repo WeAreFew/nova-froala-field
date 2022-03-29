@@ -7,7 +7,9 @@ use Froala\NovaFroalaField\Models\PendingAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Image\Manipulations;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Spatie\Image\Image;
 
 class StorePendingAttachment
 {
@@ -39,7 +41,7 @@ class StorePendingAttachment
     {
         $this->abortIfFileNameExists($request);
 
-        $attachment = PendingAttachment::create([
+        $attachmentModel = PendingAttachment::create([
             'draft_id' => $request->draftId,
             'attachment' => config('nova.froala-field.preserve_file_names')
                 ? $request->attachment->storeAs(
@@ -47,12 +49,17 @@ class StorePendingAttachment
                     $request->attachment->getClientOriginalName(),
                     $this->field->disk
                 ) : $request->attachment->store($this->field->getStorageDir(), $this->field->disk),
+            'origin_filename' => $request->attachment->getClientOriginalName(),
             'disk' => $this->field->disk,
-        ])->attachment;
+        ]);
+        
+        $attachment = $attachmentModel->attachment;
 
         $this->imageOptimize($attachment);
 
-        return Storage::disk($this->field->disk)->url($attachment);
+        $newAttachment = $this->convertImageToWebp($attachmentModel);
+
+        return Storage::disk($this->field->disk)->url($newAttachment);
     }
 
     protected function abortIfFileNameExists(Request $request): void
@@ -87,6 +94,33 @@ class StorePendingAttachment
             }
 
             $optimizerChain->optimize(Storage::disk($this->field->disk)->path($attachment));
+            
         }
+    }
+
+    protected function convertImageToWebp(PendingAttachment $attachmentModel): string
+    {
+        $oldAttachment  = $attachmentModel->attachment;
+        $attachmentName = explode('.', $oldAttachment);
+        $newAttachment  = $attachmentName[0] . '.webp';
+        $thumbFile      = $attachmentName[0] . "_thumb.webp";
+        
+        // Convert image to webp image
+        Image::load(Storage::disk($this->field->disk)->path($oldAttachment))
+            ->format(Manipulations::FORMAT_WEBP)
+            ->save(Storage::disk($this->field->disk)->path($newAttachment));
+        // Store thumb image
+        Image::load(Storage::disk($this->field->disk)->path($oldAttachment))
+            ->format(Manipulations::FORMAT_WEBP)
+            ->width(250)
+            ->height(250)
+            ->save(Storage::disk($this->field->disk)->path($thumbFile));
+        
+        $attachmentModel->attachment = $newAttachment;
+        $attachmentModel->save();
+
+        Storage::disk($this->field->disk)->delete($oldAttachment);
+
+        return $newAttachment;
     }
 }

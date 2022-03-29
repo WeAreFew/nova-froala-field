@@ -115,7 +115,7 @@ class MediaConfigurator {
         };
     }
 
-    get imageManagerDeleteConfig() {
+    get imageManagerDeleteConfig() {ge
         return {
             imageManagerDeleteURL: `/nova-vendor/froala-field/${this.resource}/image-manager`,
 

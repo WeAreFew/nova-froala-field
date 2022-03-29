@@ -49,6 +49,7 @@ class PendingAttachment extends Model
             'attachable_type' => get_class($model),
             'attachable_id' => $model->getKey(),
             'attachment' => $this->attachment,
+            'origin_filename' => $this->origin_filename,
             'disk' => $field->disk,
             'url' => Storage::disk($field->disk)->url($this->attachment),
         ]);

@@ -64,12 +64,6 @@ class MediaConfigurator {
 
             // Set request type.
             imageUploadMethod: 'POST',
-
-            events: {
-                'imageManager.error': function (error, response) {
-                    console.log(response);
-                } 
-            }
         };
     }
 
@@ -117,12 +111,11 @@ class MediaConfigurator {
 
             imageManagerLoadParams: {
                 field: this.field.attribute,
-                search: document.getElementById('fr-search-key').value,
             },
         };
     }
 
-    get imageManagerDeleteConfig() {
+    get imageManagerDeleteConfig() {ge
         return {
             imageManagerDeleteURL: `/nova-vendor/froala-field/${this.resource}/image-manager`,
 
